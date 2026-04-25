@@ -67,7 +67,7 @@ Provides semantic search over your wiki and knowledge base using ChromaDB embedd
 ## Requirements
 
 - **Python**: 3.9+
-- **Ollama**: Running with Llama 3.2 model
+- **Ollama**: Running with Llama 3.2 for conversation mode and Llama 3.1 Instruct for tool-calling mode
 - **Memory**: 4GB+ recommended
 
 ## Installation
@@ -109,13 +109,13 @@ friday
 ### Example interactions
 
 ```
-Samuel: What's the status of my projects?
+User: What's the status of my projects?
 Sexta-Feira: [Returns categorized task list with dates and priorities]
 
-Samuel: Search my wiki for async patterns
+User: Search my wiki for async patterns
 Sexta-Feira: [Retrieves semantically similar notes using RAG]
 
-Samuel: Add a reminder to review the architecture
+User: Add a reminder to review the architecture
 Sexta-Feira: [Creates note in Obsidian vault with proper tagging]
 ```
 
@@ -219,7 +219,7 @@ Development guidelines:
 
 ## Author
 
-Samuel's Friday AI Assistant
+My Friday AI Assistant
 
 ---
 
