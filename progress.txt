@@ -1,0 +1,21 @@
+# Progress Log - Sexta-Feira V2
+
+## [STATUS ATUAL]
+Em execução: 6. CLI Plus
+Foco: Implementação da Curadoria e Integração com Vault do Obsidian.
+
+## [CHECKLIST DE TAREFAS - FASE 2]
+- [x] 1. Onipresença: Configurar alias global `friday` via $PROFILE.
+- [x] 2. The Router & Personalidade: Classificador de intenções funcional.
+- [x] 3. Memory Management: Histórico de sessão (10 msgs) integrado.
+- [ ] 4. The Taskmaster/Curator:
+    - [ ] Configurar conexão com Vault real do Obsidian no .env.
+    - [ ] Reminder: Testar processo de Ingestão (Curator) com arquivo real do NotebookLM.
+- [ ] 5. The Analyst (RAG Wiki): Implementar busca semântica sobre o diretório /wiki.
+- [ ] 6. CLI Plus: Implementar Streaming de Respostas (Redução de latência percebida).
+    - [ ] 6.1 CLI Plus: Migrar do print padrão para rich.console.Console com suporte a Live displays
+- [ ] 7. Maintenance: Comando `friday lint` para auditoria de sexta-feira.
+
+## [NOTAS TÉCNICAS]
+* Lembrete: A conexão com o Obsidian exige que a pasta 'wiki' aponte para o diretório raiz do cofre.
+* Próxima otimização visual: Usar `Live` display do Rich para o streaming do motor 3B.
