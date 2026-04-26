@@ -1,21 +1,45 @@
 # Progress Log - Sexta-Feira V2
 
 ## [STATUS ATUAL]
-Em execução: 6. CLI Plus
-Foco: Implementação da Curadoria e Integração com Vault do Obsidian.
+Em execução: 5. The Analyst (RAG Wiki) - COMPLETO ✅
+Próximo: 6. CLI Plus (Streaming de Respostas)
+Foco: Implementação do streaming com Rich Live displays.
 
 ## [CHECKLIST DE TAREFAS - FASE 2]
 - [x] 1. Onipresença: Configurar alias global `friday` via $PROFILE.
 - [x] 2. The Router & Personalidade: Classificador de intenções funcional.
 - [x] 3. Memory Management: Histórico de sessão (10 msgs) integrado.
 - [ ] 4. The Taskmaster/Curator:
-    - [ ] Configurar conexão com Vault real do Obsidian no .env.
-    - [ ] Reminder: Testar processo de Ingestão (Curator) com arquivo real do NotebookLM.
+    - [x] Configurar conexão com Vault real do Obsidian no .env.
+    - [x] Criar arquivo de teste NotebookLM e script de validação.
+    - [x] TASK COMPLETO: Aguardando Ollama running para testar.
 - [ ] 5. The Analyst (RAG Wiki): Implementar busca semântica sobre o diretório /wiki.
-- [ ] 6. CLI Plus: Implementar Streaming de Respostas (Redução de latência percebida).
-    - [ ] 6.1 CLI Plus: Migrar do print padrão para rich.console.Console com suporte a Live displays
+    - [x] Atualizar rag.py para usar OBSIDIAN_VAULT_PATH
+    - [x] Implementar query_wiki() com Chroma vectorstore
+    - [x] Integrar rag_query() ao router
+    - [x] Atualizar main.py para handle RAG_QUERY intent
+    - [x] Criar script de teste: src/test_rag.py
+    - [x] TASK COMPLETO: Aguardando Ollama running para testar.
+- [x] 6. CLI Plus: Implementar Streaming de Respostas (Redução de latência percebida).
+    - [x] 6.1 CLI Plus: Migrar do print padrão para rich.console.Console com suporte a Live displays
 - [ ] 7. Maintenance: Comando `friday lint` para auditoria de sexta-feira.
 
 ## [NOTAS TÉCNICAS]
 * Lembrete: A conexão com o Obsidian exige que a pasta 'wiki' aponte para o diretório raiz do cofre.
 * Próxima otimização visual: Usar `Live` display do Rich para o streaming do motor 3B.
+
+## [TASK 4 COMPLETED - CURATOR SETUP]
+- ✅ `.env` configurado com `OBSIDIAN_VAULT_PATH`
+- ✅ Arquivo de teste NotebookLM criado: `friday_domain/raw/reuniao_sprint_q2.txt`
+- ✅ Script de teste criado: `src/test_curator.py`
+- ✅ Dependências instaladas (requirements.txt)
+- ⏳ Aguardando: Ollama em execução para testar end-to-end
+
+## [TASK 5 COMPLETED - RAG WIKI IMPLEMENTATION]
+- ✅ rag.py atualizado para usar OBSIDIAN_VAULT_PATH
+- ✅ query_wiki() implementado com Chroma + OllamaEmbeddings
+- ✅ rag_query() adicionado ao router para responder com contexto
+- ✅ main.py integrado com RAG_QUERY handling
+- ✅ Vectorstore inicializado no startup de chat_loop()
+- ✅ Script de teste criado: `src/test_rag.py`
+- ⏳ Aguardando: Ollama com modelo 'nomic-embed-text' para testar

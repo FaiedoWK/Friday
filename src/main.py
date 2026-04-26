@@ -3,8 +3,9 @@ import click
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
-from agents.router import classify_intent, stream_reply
+from agents.router import classify_intent, stream_reply, rag_query
 from agents.chronicler import run_chronicler
+from rag import init_vector_db
 from langchain_core.messages import HumanMessage, AIMessage
 
 console = Console()
@@ -12,6 +13,11 @@ console = Console()
 def chat_loop():
     # Estética Inicial
     console.print("[bold grey70]Sexta-Feira System Online[/bold grey70] [dim]| V2.0[/dim]")
+    
+    # Inicializa o banco de dados vetorial do Wiki
+    with console.status("[dim grey70]Indexando Wiki...[/dim grey70]", spinner="dots"):
+        init_vector_db()
+    
     chat_history = []
     
     while True:
@@ -27,13 +33,19 @@ def chat_loop():
             with console.status("[dim grey70]Sincronizando...[/dim grey70]", spinner="dots"):
                 intent = classify_intent(user_input, chat_history)
 
-            # Passo 2: Resposta com Streaming Suavizado (Máquina de Escrever)
+            # Passo 2: Seleciona o handler baseado na intenção
+            if "RAG_QUERY" in intent:
+                reply_stream = rag_query(user_input, chat_history)
+            else:
+                reply_stream = stream_reply(user_input, chat_history)
+
+            # Passo 3: Resposta com Streaming Suavizado (Máquina de Escrever)
             reply_full = ""
             console.print("[bold sky_blue1]Sexta-Feira:[/bold sky_blue1] ", end="")
             
             # auto_refresh=False para controlarmos o update manualmente a cada caractere
             with Live("", auto_refresh=False, transient=False) as live:
-                for chunk in stream_reply(user_input, chat_history):
+                for chunk in reply_stream:
                     token = chunk.content
                     
                     # Buffer de interpolação: quebrando o token em caracteres
