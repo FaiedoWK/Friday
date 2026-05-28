@@ -2,10 +2,10 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from src.brain import get_fast_llm
 
 
-def classify_intent(user_input: str) -> str:
+def classify_intent(user_input: str, chat_history: list = None) -> str:
     """
     Classifica a intenção do usuário para rotear para o agente correto.
-    Usa temperatura 0.0 para garantir previsibilidade e evitar alucinações.
+    Analisa a mensagem atual junto com o histórico recente para maior precisão de contexto.
     """
     llm = get_fast_llm(temperature=0.0)
     
@@ -18,8 +18,22 @@ def classify_intent(user_input: str) -> str:
         "[CURATION] - Para organizar, formatar ou processar notas cruas para o formato final.\n\n"
         "NÃO justifique sua resposta. Responda APENAS com a tag. Exemplo de saída: [CHAT]"
     ))
+
+    # Constrói um resumo das últimas mensagens para dar contexto (evita falhas com pronomes como "leia ele")
+    context = ""
+    if chat_history and len(chat_history) > 1:
+        # Pegamos até 3 mensagens antes da atual para não poluir demais o prompt
+        recent_msgs = chat_history[-4:-1] 
+        if recent_msgs:
+            for msg in recent_msgs:
+                role = "User" if isinstance(msg, HumanMessage) else "Sexta-Feira"
+                # Limitamos o conteúdo para evitar excesso de tokens de saídas longas
+                content = msg.content[:150].replace('\n', ' ')
+                context += f"{role}: {content}...\n"
+                
+    context_msg = f"Contexto Recente da Conversa:\n{context if context else 'Nenhum'}\n\n--- \nClassifique a intenção desta NOVA entrada do usuário: {user_input}"
     
-    messages = [system_prompt, HumanMessage(content=user_input)]
+    messages = [system_prompt, HumanMessage(content=context_msg)]
     
     try:
         response = llm.invoke(messages)

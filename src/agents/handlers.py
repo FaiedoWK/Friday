@@ -63,7 +63,7 @@ def handle_tool_edit(user_instruction: str) -> str:
             "- 'read' para ler um arquivo\n"
             "- 'write' para criar/sobrescrever um arquivo\n"
             "- 'append' para adicionar conteúdo\n"
-            "- 'list' para listar diretório\n"
+            "- 'list' para listar diretório (use para listar os arquivos)\n"
             "- 'delete' para deletar arquivo\n\n"
             "Responda em JSON com formato: {\"action\": \"...\", \"path\": \"...\", \"content\": \"...\"}"
         ))
@@ -76,21 +76,33 @@ def handle_tool_edit(user_instruction: str) -> str:
         # Try to parse as JSON
         import json
         try:
+            if not response or not response.content:
+                raise json.JSONDecodeError("Empty response from LLM", "", 0)
             command = json.loads(response.content)
-        except json.JSONDecodeError:
-            # Fallback: extract basic command
-            content_lower = response.content.lower()
+        except (json.JSONDecodeError, TypeError):
+            # Fallback: If LLM fails to produce JSON, infer from the user's original text.
+            content_lower = user_instruction.lower()
             if "ler" in content_lower or "read" in content_lower:
                 command = {"action": "read", "path": extract_path(user_instruction)}
-            elif "listar" in content_lower or "list" in content_lower:
+            elif "listar" in content_lower or "list" in content_lower or "quais arquivos" in content_lower:
                 command = {"action": "list", "path": extract_path(user_instruction) or ""}
             else:
-                command = {"action": "error", "error": "Não consegui entender o comando"}
+                return f"❌ Não consegui interpretar o comando de arquivo. Por favor, tente ser mais explícito, como 'crie um arquivo chamado...', 'leia o arquivo...', ou 'liste os arquivos'."
         
-        # Execute the command
-        action = command.get("action", "").lower()
-        path = command.get("path", "")
-        content = command.get("content", "")
+        # Execute the command safely handling None/null values
+        action = str(command.get("action") or "").lower()
+        path = str(command.get("path") or "")
+        content = str(command.get("content") or "")
+        
+        # Secondary fallback: If JSON was valid but action is empty/null
+        if not action:
+            content_lower = user_instruction.lower()
+            if "ler" in content_lower or "read" in content_lower:
+                action, path = "read", extract_path(user_instruction)
+            elif "listar" in content_lower or "list" in content_lower or "quais" in content_lower:
+                action, path = "list", (extract_path(user_instruction) or "")
+            else:
+                return f"❌ Não consegui identificar a ação específica. Especifique 'leia', 'crie' ou 'liste'."
         
         if action == "read":
             return read_file(path)

@@ -1,82 +1,38 @@
 # Progress Log - Sexta-Feira V2
 
 ## [STATUS ATUAL]
-Em execução: 5. The Analyst (RAG Wiki) - COMPLETO ✅
-Próximo: 6. CLI Plus (Streaming de Respostas)
-Foco: Implementação do streaming com Rich Live displays.
+Em execução: Fase 3 - Web Intelligence & Background Service
+Próximo: 1. Scout Agent (Web scraper inteligente)
+Foco: Implementar scraper.py e extração semântica com LLM local.
 
-## [CHECKLIST DE TAREFAS - FASE 2]
+## [CHECKLIST DE TAREFAS - FASES 1 & 2: FUNDAÇÕES E CÉREBRO] (COMPLETAS ✅)
+- [x] 0. Setup: Estrutura de pastas, dependências e ambiente (.env)
 - [x] 1. Onipresença: Configurar alias global `friday` via $PROFILE.
 - [x] 2. The Router & Personalidade: Classificador de intenções funcional.
 - [x] 3. Memory Management: Histórico de sessão (10 msgs) integrado.
-- [ ] 4. The Taskmaster/Curator:
-    - [x] Configurar conexão com Vault real do Obsidian no .env.
-    - [x] Criar arquivo de teste NotebookLM e script de validação.
-    - [x] TASK COMPLETO: Aguardando Ollama running para testar.
-- [ ] 5. The Analyst (RAG Wiki): Implementar busca semântica sobre o diretório /wiki.
-    - [x] Atualizar rag.py para usar OBSIDIAN_VAULT_PATH
-    - [x] Implementar query_wiki() com Chroma vectorstore
-    - [x] Integrar rag_query() ao router
-    - [x] Atualizar main.py para handle RAG_QUERY intent
-    - [x] Criar script de teste: src/test_rag.py
-    - [x] TASK COMPLETO: Aguardando Ollama running para testar.
-- [x] 6. CLI Plus: Implementar Streaming de Respostas (Redução de latência percebida).
-    - [x] 6.1 CLI Plus: Migrar do print padrão para rich.console.Console com suporte a Live displays
-- [ ] 7. Maintenance: Comando `friday lint` para auditoria de sexta-feira.
-
-## [NOTAS TÉCNICAS]
-* Lembrete: A conexão com o Obsidian exige que a pasta 'wiki' aponte para o diretório raiz do cofre.
-* Próxima otimização visual: Usar `Live` display do Rich para o streaming do motor 3B.
-
-## [TASK 4 COMPLETED - CURATOR SETUP]
-- ✅ `.env` configurado com `OBSIDIAN_VAULT_PATH`
-- ✅ Arquivo de teste NotebookLM criado: `friday_domain/raw/reuniao_sprint_q2.txt`
-- ✅ Script de teste criado: `src/test_curator.py`
-- ✅ Dependências instaladas (requirements.txt)
-- ⏳ Aguardando: Ollama em execução para testar end-to-end
-
-## [TASK 5 COMPLETED - RAG WIKI IMPLEMENTATION]
-- ✅ rag.py atualizado para usar OBSIDIAN_VAULT_PATH
-- ✅ query_wiki() implementado com Chroma + OllamaEmbeddings
-- ✅ rag_query() adicionado ao router para responder com contexto
-- ✅ main.py integrado com RAG_QUERY handling
-- ✅ Vectorstore inicializado no startup de chat_loop()
-- ✅ Script de teste criado: `src/test_rag.py`
-- ⏳ Aguardando: Ollama com modelo 'nomic-embed-text' para testar
-
-Novas Features:
-
-# Progress Log - Sexta-Feira V2
-
-## [STATUS ATUAL]
-Em execução: Fase 2 - Sistema RAG (Pro Model)
-Próximo: Configurar Banco de Dados Vetorial
-Foco: Implementar busca semântica em `rag.py` usando `nomic-embed-text` e ChromaDB.
+- [x] 4. The Taskmaster/Curator: Integração de edição e manipulação de arquivos (Obsidian).
+- [x] 5. The Analyst (RAG Wiki): Implementada busca semântica sobre /wiki com Chroma.
+- [x] 6. CLI Plus: Streaming com Rich Live displays operando no Fast Model.
 
 ## [CHECKLIST DE TAREFAS - FASE 3: WEB INTELLIGENCE & BACKGROUND SERVICE]
 - [ ] 1. Scout Agent: Web scraper inteligente com extração de insights
-  - [ ] Integração com sites selecionados (IA, tecnologia, inovações)
-  - [ ] Extração semântica usando LLM local
-  - [ ] Cache de artigos em `data/scrape/`
-  - [ ] Geração de digest semanal com links
+    - [ ] Integração com sites selecionados (IA, tecnologia, inovações)
+    - [ ] Extração semântica usando LLM local
+    - [ ] Cache de artigos em `data/scrape/`
+    - [ ] Geração de digest semanal com links
 - [ ] 2. Local Dashboard: Interface web para visualização
-  - [ ] Design responsivo inspirado em referência visual
-  - [ ] Exibição de insights da semana + links de artigos
-  - [ ] Integração com dados do Scout Agent
-  - [ ] Servidor HTTP local (porta configurável)
+    - [ ] Design responsivo inspirado em referência visual
+    - [ ] Exibição de insights da semana + links de artigos
+    - [ ] Integração com dados do Scout Agent
+    - [ ] Servidor HTTP local (porta configurável)
 - [ ] 3. Background Service: Serviço em segundo plano
-  - [ ] Auto-inicialização com notebook
-  - [ ] Monitoramento contínuo de tarefas no pipeline
-  - [ ] Avaliação automática de contexto e prioridades
-  - [ ] Notificações de mudanças relevantes
-
-## [CHECKLIST DE TAREFAS - FASE 1: FUNDAÇÕES]
-- [x] 0. Setup: Estrutura de pastas, dependências e ambiente (.env)
-- [x] 1. Base CLI: Interface Rica com `click` e `rich`
-- [x] 2. Conexão LLM: `brain.py` configurado com Ollama
-- [x] 3. The Router: Classificador de intenções inicial (Fast Model)
-- [x] 4. Memória: Histórico de sessão de curto prazo integrado
+    - [ ] Auto-inicialização com notebook
+    - [ ] Monitoramento contínuo de tarefas no pipeline
+    - [ ] Avaliação automática de contexto e prioridades
+    - [ ] Notificações de mudanças relevantes
+- [ ] 4. Maintenance: Comando `friday lint` para auditoria de sexta-feira.
 
 ## [NOTAS TÉCNICAS]
 * Arquitetura Híbrida: Llama 3.2 (3B) para Chat/Roteamento; Llama 3.1 (8B) para RAG/Ferramentas.
+* CLI atualizada e rodando nativamente com live stream (`rich.live`) para o fluxo de bate-papo padrão.
 * Tudo deve ser implementado de forma modular e altamente testável desde o Dia 1.
