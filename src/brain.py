@@ -1,27 +1,41 @@
-from langchain_ollama import ChatOllama
+import os
+from dotenv import load_dotenv
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 
-def get_llm(model_type: str = "fast"):
+# Carrega as variáveis de ambiente do .env
+load_dotenv()
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+FAST_MODEL_NAME = os.getenv("FAST_MODEL", "llama3.2")
+PRO_MODEL_NAME = os.getenv("PRO_MODEL", "llama3.1")
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
+
+def get_fast_llm(temperature: float = 0.7) -> ChatOllama:
     """
-    Retorna a instância do LLM local (Ollama) de acordo com a complexidade da tarefa.
+    Retorna a instância do Fast Model (Llama 3.2 - 3B).
+    Usado para Chat Rápido e Roteamento de Intenções.
     """
-    if model_type == "pro":
-        # Motor Operacional (Tool-Calling Zero-Shot)
-        return ChatOllama(
-            model="llama3.1", # <-- Tag atualizada aqui
-            temperature=0.2,
-            base_url="http://localhost:11434"
-        )
-    
-    # Modelo default (fast) para consultas simples e baixa latência
     return ChatOllama(
-        model="llama3.2",
-        temperature=0.1,
-        base_url="http://localhost:11434"
+        model=FAST_MODEL_NAME,
+        base_url=OLLAMA_BASE_URL,
+        temperature=temperature,
     )
 
-if __name__ == "__main__":
-    # Teste rápido de conexão
-    print("Testando conexão com Llama 3.2...")
-    llm = get_llm("fast")
-    resposta = llm.invoke("Responda apenas 'Conexão estabelecida com sucesso'.")
-    print(f"Status: {resposta.content}")
+def get_pro_llm(temperature: float = 0.0) -> ChatOllama:
+    """
+    Retorna a instância do Pro Model (Llama 3.1 - 8B).
+    Usado para RAG, Tool Calling e raciocínio complexo.
+    Temperatura 0.0 para evitar alucinações.
+    """
+    return ChatOllama(
+        model=PRO_MODEL_NAME,
+        base_url=OLLAMA_BASE_URL,
+        temperature=temperature,
+    )
+
+def get_embeddings() -> OllamaEmbeddings:
+    """Retorna o modelo de Embeddings para busca semântica."""
+    return OllamaEmbeddings(
+        model=EMBEDDING_MODEL_NAME,
+        base_url=OLLAMA_BASE_URL,
+    )

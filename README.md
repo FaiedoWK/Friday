@@ -14,6 +14,9 @@ An intelligent AI agent system powered by local LLMs, built with LangChain and d
 - 🔗 **Obsidian Vault Integration**: Seamlessly connects to your Obsidian vault for note curation
 - 🎨 **Rich CLI Interface**: Beautiful, responsive terminal UI with streaming responses
 - 🚀 **Local-First**: Runs entirely on your machine using Ollama—no external API calls needed
+- 🌐 **Web Scraper Agent**: Intelligent news aggregation from AI/Tech sites with semantic insights
+- 📰 **Local Dashboard**: Beautiful web UI displaying weekly insights and articles with visual design
+- 🔄 **Background Service**: Auto-starts with notebook, monitors tasks and provides contextual updates
 
 ## Project Structure
 
@@ -23,10 +26,12 @@ Friday/
 │   ├── main.py              # Entry point with chat loop
 │   ├── brain.py             # LLM initialization and configuration
 │   ├── rag.py               # Vector database and semantic search
+│   ├── scraper.py           # Web scraping and news aggregation
 │   ├── agents/
 │   │   ├── router.py        # Intent classification & routing
 │   │   ├── chronicler.py    # Task recording & history
-│   │   └── curator.py       # Obsidian vault curation
+│   │   ├── curator.py       # Obsidian vault curation
+│   │   └── scout.py         # Web scraper agent for news aggregation
 │   └── tools/
 │       ├── editor.py        # File editing utilities
 │       ├── file_ops.py      # File operations
@@ -38,7 +43,9 @@ Friday/
 │   ├── vault/               # Obsidian vault reference
 │   └── logs/                # Domain-specific logs
 ├── data/
-│   └── db/                  # Vector DB storage (ChromaDB)
+│   ├── db/                  # Vector DB storage (ChromaDB)
+│   ├── scrape/              # Scraped articles and insights cache
+│   └── templates/           # HTML templates for local dashboard
 ├── requirements.txt         # Python dependencies
 └── progress.txt             # Development progress tracking
 ```
@@ -60,6 +67,21 @@ Handles Obsidian vault integration and note management. Features:
 - Automatic note ingestion
 - Tag-based organization
 - Task extraction to "Pendências" sections
+
+### Scout (`agents/scout.py`)
+Web scraping and news aggregation agent. Features:
+- Intelligent scraping of selected tech, AI, and innovation sites
+- Semantic extraction of key insights using local LLM
+- Weekly digest generation with article links and context
+- Caches insights for dashboard display
+
+### Local Dashboard (`src/dashboard.py`)
+Beautiful web interface displaying Friday's intelligence. Features:
+- Responsive design showing weekly news insights
+- Article aggregation with semantic summaries
+- Task pipeline monitoring and status
+- Auto-refreshing data from background service
+- Accessible via local HTTP server (e.g., `http://localhost:8765`)
 
 ### RAG System (`src/rag.py`)
 Provides semantic search over your wiki and knowledge base using ChromaDB embeddings.
@@ -147,6 +169,10 @@ Sexta-Feira: [Creates note in Obsidian vault with proper tagging]
 - Advanced task management (Taskmaster agent)
 - Maintenance commands (`friday lint`)
 - Performance optimizations
+- **Web Scraper Agent (Scout)**: Intelligent news aggregation from tech/AI/innovation sites
+- **Local Dashboard**: Beautiful web UI for weekly insights and article browsing
+- **Background Service**: Auto-start with notebook, continuous task monitoring and pipeline evaluation
+- Enhanced context awareness from scraped insights integration
 
 ## Wiki Formatting Rules
 

@@ -1,65 +1,103 @@
+"""
+Curator Agent - Manages document ingestion from /raw to /wiki
+Handles formatting, schema validation, and metadata injection
+"""
 import os
+from pathlib import Path
 from datetime import datetime
-from langchain_core.prompts import ChatPromptTemplate
-from brain import get_llm
-from tools.file_ops import read_file, write_file
+from src.tools.file_ops import read_file, write_file, list_files
 
-def run_ingest(raw_filename: str, output_topic: str):
+FRIDAY_DOMAIN = Path(os.getenv("FRIDAY_DOMAIN_PATH", "./friday_domain")).resolve()
+RAW_DIR = FRIDAY_DOMAIN / "raw"
+WIKI_DIR = FRIDAY_DOMAIN / "wiki"
+
+
+def format_obsidian_note(content: str, tags: list = None, source: str = "") -> str:
     """
-    Motor de Ingestão do LLM Wiki.
-    Lê um arquivo cru, aplica o schema e salva no formato Obsidian na pasta /wiki.
+    Formats raw content into Obsidian-compatible Markdown.
+    Injects metadata (source, date, tags) as frontmatter.
     """
-    print(f"Iniciando ingestão do arquivo: {raw_filename}...")
+    if tags is None:
+        tags = ["inbox"]
     
-    # 1. Lê o arquivo cru e o schema
-    raw_content = read_file.invoke({"relative_path": f"raw/{raw_filename}"})
-    schema_content = read_file.invoke({"relative_path": "schema.md"})
+    frontmatter = f"""---
+created: {datetime.now().isoformat()}
+source: {source}
+tags: {' '.join([f'#{tag}' for tag in tags])}
+---
+
+"""
+    return frontmatter + content
+
+
+def ingest_raw_file(raw_filename: str, wiki_filename: str = None, tags: list = None) -> str:
+    """
+    Reads a file from /raw, formats it for Obsidian, and saves to /wiki.
     
-    if "Erro" in raw_content:
-        print(f"Falha ao ler o arquivo cru: {raw_content}")
-        return
-        
-    # 2. Prepara o nome do arquivo final no Obsidian
-    hoje = datetime.now().strftime("%Y-%m-%d")
-    clean_topic = output_topic.replace(" ", "-").lower()
-    wiki_filename = f"wiki/{hoje}-{clean_topic}.md"
+    Args:
+        raw_filename: filename in raw/ (relative path)
+        wiki_filename: output filename in wiki/ (defaults to same name)
+        tags: list of tags to add to frontmatter
     
-    # 3. Instancia o motor 8B (Operacional) e acopla a ferramenta de escrita
-    llm = get_llm("pro")
-    llm_with_tools = llm.bind_tools([write_file])
-    
-    # 4. Prompt Zero-Shot instruindo a curadoria
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "Você é o 'The Curator', o agente de manutenção de conhecimento. "
-                   "Sua função é ler o Documento Cru e reescrevê-lo estritamente seguindo "
-                   "as regras do Schema fornecido. "
-                   "Após gerar o conteúdo processado, utilize a ferramenta 'write_file' "
-                   "para salvá-lo no destino. Não adicione conversação."),
-        ("user", f"--- SCHEMA (Regras de Formatação) ---\n{schema_content}\n\n"
-                 f"--- DOCUMENTO CRU ---\n{raw_content}\n\n"
-                 f"Gere o arquivo final e salve em: {wiki_filename}")
-    ])
-    
-    chain = prompt | llm_with_tools
-    
+    Returns: success/error message
+    """
     try:
-        response = chain.invoke({})
+        if wiki_filename is None:
+            wiki_filename = raw_filename
         
-        if response.tool_calls:
-            for tool_call in response.tool_calls:
-                if tool_call["name"] == "write_file":
-                    args = tool_call["args"]
-                    print(f"Processamento concluído. Salvando no Wiki...")
-                    result = write_file.invoke(args)
-                    print(result)
+        # Read raw file
+        raw_path = f"raw/{raw_filename}"
+        content = read_file(raw_path)
+        
+        if content.startswith("❌"):  # Error
+            return content
+        
+        # Format for Obsidian
+        formatted = format_obsidian_note(content, tags=tags or ["inbox"], source=raw_filename)
+        
+        # Write to wiki
+        wiki_path = f"wiki/{wiki_filename}"
+        result = write_file(wiki_path, formatted)
+        
+        if "✅" in result:
+            return f"✅ Documento curado: {raw_filename} → {wiki_filename}"
         else:
-            print("Aviso: O modelo tentou responder em texto ao invés de usar a ferramenta.")
-            print(response.content)
-            
+            return result
+    
     except Exception as e:
-        print(f"Erro na execução da Ingestão: {e}")
+        return f"❌ Erro ao curar documento: {e}"
 
-if __name__ == "__main__":
-    # Teste de execução direta (necessário ter o arquivo teste na pasta raw)
-    # run_ingest("anotacoes_half_loop.txt", "projeto half loop")
-    pass
+
+def list_pending_ingestion() -> str:
+    """
+    Lists files in /raw that haven't been processed yet.
+    Returns: formatted list of pending files
+    """
+    return list_files("raw")
+
+
+def validate_vault_structure() -> str:
+    """
+    Validates that vault directories exist and are accessible.
+    Returns: validation report
+    """
+    checks = []
+    
+    # Check raw directory
+    raw_exists = RAW_DIR.exists()
+    checks.append(f"{'✅' if raw_exists else '❌'} /raw directory: {RAW_DIR}")
+    
+    # Check wiki directory
+    wiki_exists = WIKI_DIR.exists()
+    checks.append(f"{'✅' if wiki_exists else '❌'} /wiki directory: {WIKI_DIR}")
+    
+    # Create if missing
+    if not raw_exists:
+        RAW_DIR.mkdir(parents=True, exist_ok=True)
+        checks.append("  → Criado /raw directory")
+    
+    if not wiki_exists:
+        WIKI_DIR.mkdir(parents=True, exist_ok=True)
+        checks.append("  → Criado /wiki directory")
+    
+    return "\n".join(checks)

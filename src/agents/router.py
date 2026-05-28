@@ -1,74 +1,61 @@
-import json
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from brain import get_llm
-from rag import query_wiki, init_vector_db
+from langchain_core.messages import SystemMessage, HumanMessage
+from src.brain import get_fast_llm
 
-def classify_intent(user_input: str, chat_history: list) -> str:
+
+def classify_intent(user_input: str) -> str:
     """
-    Passo 1: Identifica a intenção em milissegundos.
+    Classifica a intenção do usuário para rotear para o agente correto.
+    Usa temperatura 0.0 para garantir previsibilidade e evitar alucinações.
     """
-    llm = get_llm("fast")
-    system_prompt = "Responda APENAS com a intenção: CHAT, RAG_QUERY, TOOL_EDIT, ou TOOL_REWIND."
+    llm = get_fast_llm(temperature=0.0)
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        MessagesPlaceholder(variable_name="history"),
-        ("user", "{input}")
-    ])
+    system_prompt = SystemMessage(content=(
+        "Você é o classificador de intenções da Sexta-Feira (Friday). "
+        "Sua única função é ler a entrada do usuário e responder com EXATAMENTE UMA das seguintes tags, e nada mais:\n\n"
+        "[CHAT] - Para bate-papo geral, perguntas simples, saudações ou qualquer coisa que não exija busca de arquivos.\n"
+        "[RAG_SEARCH] - Para perguntas que exigem busca no Obsidian, base de conhecimento pessoal, ou ler documentos do usuário.\n"
+        "[TOOL_EDIT] - Para comandos de criação, edição ou manipulação de arquivos locais e tarefas.\n"
+        "[CURATION] - Para organizar, formatar ou processar notas cruas para o formato final.\n\n"
+        "NÃO justifique sua resposta. Responda APENAS com a tag. Exemplo de saída: [CHAT]"
+    ))
     
-    chain = prompt | llm
-    response = chain.invoke({"input": user_input, "history": chat_history})
-    return response.content.strip().upper()
+    messages = [system_prompt, HumanMessage(content=user_input)]
+    
+    try:
+        response = llm.invoke(messages)
+        content = response.content.strip().upper()
+        
+        for intent in ["[CHAT]", "[RAG_SEARCH]", "[TOOL_EDIT]", "[CURATION]"]:
+            if intent in content:
+                return intent
+    except Exception:
+        pass
+        
+    return "[CHAT]"  # Fallback seguro
 
-def stream_reply(user_input: str, chat_history: list):
+
+def handle_intent(intent: str, user_input: str) -> tuple[str, str]:
     """
-    Passo 2: Gera a resposta sarcástica com streaming.
+    Routes to appropriate handler based on intent.
+    Returns: (handler_type, response_content)
+    
+    This REPLACES hallucination with real tool calling.
     """
-    llm = get_llm("fast")
-    system_prompt = """Você é 'Sexta-Feira', assistente virtual do Samuel.
-Sua personalidade: Extremamente formal, as vezes sarcástico (estilo Jarvis), elegante e pontual.
-Você ocasionalmente usa gírias como 'poggers', 'paia', 'Tá potente'.
-Mantenha a memória da sessão ativa."""
-
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        MessagesPlaceholder(variable_name="history"),
-        ("user", "{input}")
-    ])
+    if intent == "[RAG_SEARCH]":
+        from src.agents.handlers import handle_rag_search
+        response = handle_rag_search(user_input)
+        return ("rag", response)
     
-    return (prompt | llm).stream({"input": user_input, "history": chat_history})
-
-def rag_query(user_input: str, chat_history: list):
-    """
-    Passo 2 (RAG): Busca contexto no wiki e gera resposta enriquecida.
-    """
-    # Recupera contexto relevante do wiki
-    context = query_wiki(user_input, k=5)
+    elif intent == "[TOOL_EDIT]":
+        from src.agents.handlers import handle_tool_edit
+        response = handle_tool_edit(user_input)
+        return ("tool", response)
     
-    if "❌" in context or "Erro" in context:
-        # Se a busca falhar, volta ao chat normal
-        return stream_reply(user_input, chat_history)
+    elif intent == "[CURATION]":
+        from src.agents.handlers import handle_curation
+        response = handle_curation(user_input)
+        return ("curation", response)
     
-    # LLM com contexto RAG
-    llm = get_llm("pro")  # Usa modelo pro para melhor compreensão
-    system_prompt = """Você é 'Sexta-Feira', assistente virtual do Samuel.
-Sua personalidade: Extremamente formal, as vezes sarcástico (estilo Jarvis), elegante e pontual.
-
-Responda com base no contexto do Wiki fornecido abaixo. Se o contexto não abordar a pergunta, diga que não encontrou informações.
-
---- CONTEXTO DO WIKI ---
-{context}
----"""
-
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        MessagesPlaceholder(variable_name="history"),
-        ("user", "{input}")
-    ])
-    
-    chain = prompt | llm
-    return chain.stream({
-        "context": context,
-        "input": user_input, 
-        "history": chat_history
-    })
+    else:  # [CHAT] or fallback
+        # For chat, return the intent type so main can call fast_llm
+        return ("chat", "")
