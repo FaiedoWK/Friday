@@ -1,38 +1,46 @@
-# Progress Log - Sexta-Feira V2
+# Progress Log - Sexta-Feira V2 (Cérebro Único)
 
 ## [STATUS ATUAL]
-Em execução: Fase 3 - Web Intelligence & Background Service
-Próximo: 1. Scout Agent (Web scraper inteligente)
-Foco: Implementar scraper.py e extração semântica com LLM local.
+Fase Atual: Fase 2 - Otimização de Ferramentas e Interface CLI
+Em execução: Estabilização do motor unificado
+Próximo: Lapidação do Web Scraping (Resumos automáticos)
 
-## [CHECKLIST DE TAREFAS - FASES 1 & 2: FUNDAÇÕES E CÉREBRO] (COMPLETAS ✅)
-- [x] 0. Setup: Estrutura de pastas, dependências e ambiente (.env)
-- [x] 1. Onipresença: Configurar alias global `friday` via $PROFILE.
-- [x] 2. The Router & Personalidade: Classificador de intenções funcional.
-- [x] 3. Memory Management: Histórico de sessão (10 msgs) integrado.
-- [x] 4. The Taskmaster/Curator: Integração de edição e manipulação de arquivos (Obsidian).
-- [x] 5. The Analyst (RAG Wiki): Implementada busca semântica sobre /wiki com Chroma.
-- [x] 6. CLI Plus: Streaming com Rich Live displays operando no Fast Model.
+---
 
-## [CHECKLIST DE TAREFAS - FASE 3: WEB INTELLIGENCE & BACKGROUND SERVICE]
-- [ ] 1. Scout Agent: Web scraper inteligente com extração de insights
-    - [ ] Integração com sites selecionados (IA, tecnologia, inovações)
-    - [ ] Extração semântica usando LLM local
-    - [ ] Cache de artigos em `data/scrape/`
-    - [ ] Geração de digest semanal com links
-- [ ] 2. Local Dashboard: Interface web para visualização
-    - [ ] Design responsivo inspirado em referência visual
-    - [ ] Exibição de insights da semana + links de artigos
-    - [ ] Integração com dados do Scout Agent
-    - [ ] Servidor HTTP local (porta configurável)
-- [ ] 3. Background Service: Serviço em segundo plano
-    - [ ] Auto-inicialização com notebook
-    - [ ] Monitoramento contínuo de tarefas no pipeline
-    - [ ] Avaliação automática de contexto e prioridades
-    - [ ] Notificações de mudanças relevantes
-- [ ] 4. Maintenance: Comando `friday lint` para auditoria de sexta-feira.
+## [CHECKLIST DE TAREFAS - FASE 1: FUNDAÇÕES DO MOTOR] (COMPLETAS ✅)
+- [x] 0. Setup: Estrutura simplificada de pastas (`v2_storage/wiki` e `tasks.md`).
+- [x] 1. Onipresença: Configuração do alias global `friday` corrigido no `$PROFILE` do PowerShell.
+- [x] 2. Ambiente Isolado: Criação e ativação da `.venv` limpa com dependências corretas.
+- [x] 3. Git Shield: Configuração do `.gitignore` protegendo dados locais e arquivo `.gitkeep` ancorando a Wiki.
+
+---
+
+## [CHECKLIST DE TAREFAS - FASE 2: CÉREBRO & INTERFACE] (COMPLETAS ✅)
+- [x] 1. Cérebro Único: Migração total para o Qwen 2.5 7B via Ollama (suporte a Tool Calling nativo).
+- [x] 2. Interface Claude Code: Loader minimalista com spinner ASCII e mensagens dinâmicas via Threads.
+- [x] 3. Respostas Fluidas: Streaming de saída suave caractere por caractere (efeito typing com `time.sleep`).
+- [x] 4. Blindagem de Erros: Tratamento de falhas de parsing de JSON com `handle_parsing_errors=True`.
+- [x] 5. Ferramentas Core (Fase A):
+    - [x] `ler_wiki`: Consulta de notas Markdown.
+    - [x] `escrever_wiki`: Criação e sobrescrita de arquivos.
+    - [x] `listar_arquivos_wiki`: Listagem completa de qualquer arquivo no diretório (Modo Listar Tudo).
+    - [x] `gerenciar_tarefas`: Visualização e atualização do `tasks.md`.
+
+---
+
+## [CHECKLIST DE TAREFAS - FASE 3: BACKLOG / A FAZER] (PENDENTES 📋)
+- [ ] 1. Manutenção do Append (`adicionar_na_wiki`):
+    - [ ] Validar comportamento físico do append em testes longos.
+    - [ ] Implementar quebra de linha dupla automática padrão para separar novos blocos.
+- [ ] 2. Web Intelligence Analítica:
+    - [ ] Ajustar o comportamento do modelo pós-scraping (proibir retorno de texto bruto).
+    - [ ] Forçar resumos automáticos estruturados em Markdown após a leitura de URLs.
+- [ ] 3. Modularização da Arquitetura:
+    - [ ] Mudar de script único para pacotes modulares (`src/tools/`, `src/agents/`) quando o arquivo passar de 300 linhas.
+
+---
 
 ## [NOTAS TÉCNICAS]
-* Arquitetura Híbrida: Llama 3.2 (3B) para Chat/Roteamento; Llama 3.1 (8B) para RAG/Ferramentas.
-* CLI atualizada e rodando nativamente com live stream (`rich.live`) para o fluxo de bate-papo padrão.
-* Tudo deve ser implementado de forma modular e altamente testável desde o Dia 1.
+* Hardware: Execução leve consumindo ~4.7 GB de RAM no modelo Qwen 2.5 7B.
+* Framework: LangChain Clássico utilizado especificamente para garantir estabilidade absoluta no acionamento de funções via Ollama.
+* UI: Interface hacker minimalista sem caixas (Panels) verdes, mantendo apenas a identificação de chat "Sexta-Feira >".
