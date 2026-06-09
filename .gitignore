@@ -13,6 +13,10 @@ __pycache__/
 # Ignora o arquivo de tarefas central
 v2_storage/tasks.md
 
+# 4. Helpers
+GEMINI.md
+progress.txt
+
 # Ignora todo o conteúdo dentro da pasta wiki
 v2_storage/wiki/*
 # Obriga o Git a rastrear o arquivo .gitkeep para manter a pasta viva
